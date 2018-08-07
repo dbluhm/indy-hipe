@@ -21,9 +21,9 @@ This HIPE will establish the exchange of messages needed to establish a pairwise
 
 ## Assumptions
 
-The step that has been referred to as a "connection trigger" or previously called a "connection offer" (this term
-has been deemed inaccurate) will not be covered in this HIPE. We assume that some previous action has taken place to
-enable two agents to communicate.
+The step that has been referred to as a "connection trigger," "connection offer," (this term has been deemed
+inaccurate), and "connection invitation" will not be covered in this HIPE. We assume that some previous action has taken
+place to enable two agents to communicate.
 
 The details of transporting a message from one agent to the other will also not be covered in this HIPE. We assume the
 message packaging and transport details are correctly executed when using phrases like "Agent 1 sends the message
@@ -43,37 +43,179 @@ in accordance with the [proposed HIPE on message types](https://github.com/hyper
 
 ## Message Types
 
-The types of this message family use terms similar to those that are described in the [negotiation
-flow](https://github.com/sovrin-foundation/ssi-protocol/tree/master/flow/std/negotiate_msg).
+### Connection Request
+
+A connection request is used to minimally transmit the information needed by the receiver to communicate with the sender
+in a pairwise relationship.
+
+#### Type
+
+We propose that the message type for a connection request will be `request`, resulting in the following message type
+string:
+
+```
+did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connection/1.0/request
+```
+
+#### Example and Attributes
+
+An connection request minimally includes the following information:
+
+```json
+{
+    "@type": "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connection/1.0/request",
+    "@thread": { ... },
+    "did": "did:sov:123456...",
+    --- or ---
+    "diddoc": { ... }
+}
+```
+
+##### Attributes
+
+- `@thread` - the threading "decorator" described in [this HIPE](https://github.com/hyperledger/indy-hipe/pull/30).
+  This decorator is used to identify which connection the message is referring to.
+- `did` or `diddoc` - the `did` attribute can be used to look up all information needed in the pairwise relationship
+  (endpoints and keys) or a `diddoc` can be provided, resulting in the same set of information.
+
+#### Usage in negotiation
+
+The connection request message is the first message sent using agent-to-agent (A2A) encryption and routing. The
+connection request also marks the beginning of a "negotiation" or an exchange of request and counter-offer messages. If
+the terms of a connection request are not desirable, the receiving party can send an offer message proposing altered
+terms to the connection. Upon receiving the counteroffer, the original request sender can send a request matching the
+terms of the offer, advancing the interaction, or issue another counter proposal, continuing the negotiation until
+favorable terms have been met.
+
+The party that receives the connection request can accept the terms and advance the interaction by simply sending one of
+the connection outcome messages described below.
+
+Further detail on connection negotiation and how the terms of a connection are expressed can be provided by a future
+HIPE and won't be explored further here.
+
+#### Unresolved Questions
+
+- Do we want more granular types for a connection request that supplies a `did` and for a request that supplies a
+  `diddoc`?
+
+------------------------------------------------------------------------------------------------------------------------
 
 ### Connection Offer
 
+As mentioned above, the connection offer message is used to negotiate the terms of the connection. For more information
+see [Usage in Negotiation](#usage-in-negotiation) and this [spreadsheet](https://docs.google.com/spreadsheets/d/1RLJhhlWCUBYpKn18S5BGi7HH9MfGiZdHBxKjsJavoMs/edit#gid=0)
+and [video](http://bit.ly/2nhQMRC) by Daniel Hardman on connection establishment.
+
+#### Type
 We propose that the message type for a connection offer will be `offer`, resulting in the following message type string:
 
 ```
 did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connection/1.0/offer
 ```
 
-In a negotiation flow, offer and request messages are used to negotiate the terms of the negotiation's focus. In the
-context of connection establishment, this would mean that connection offer and request messages are used to iteratively
-negotiate the terms of the pairwise connection.
+#### Example and Attributes
+Connection offers must minimally contain enough information for the request sender to send successive connection
+requests if this information has not already been shared.
 
-Typically, there is no need to negotiate the terms of a connection. It is not anticipated that the connection offer will
-be commonly used but it is included here for completeness.
+> **TODO:** What is actually transmitted in the offer?
+> **TODO:** give an example
 
-Connection offers contain essentially the same information as connection requests:
+------------------------------------------------------------------------------------------------------------------------
+
+### Connection Accept
+
+Connection acceptance messages are used to transmit both acceptance of the sender's request and the information needed
+by the request sender to communicate with the receiver in a pairwise relationship.
+
+#### Type
+
+We propose that the message type for the connection acceptance message will be `accept`, resulting in the following
+message type string:
+
+```
+did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connection/1.0/accept
+```
+
+#### Example and Attributes
 
 ```json
 {
-    "@type": "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connection/1.0/offer",
-    "@thread": "threading object defined here",
-    "did": "did:sov:123456..."
+    "@type": "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connection/1.0/accept",
+    "@thread": { ... },
+    "did": "did:sov:123456...",
+    --- or ---
+    "diddoc": { ... }
 }
 ```
 
 #### Attributes
+- `@thread` - The threading object used to correlate different messages with each other.
+- `did` or `diddoc` - the `did` attribute can be used to look up all information needed in the pairwise relationship
+  (endpoints and keys) or a `diddoc` can be provided, resulting in the same set of information.
 
-- `"@thread"` - the threading "decorator" will be described in another HIPE
+------------------------------------------------------------------------------------------------------------------------
+
+### Connection Reject
+
+Connection rejection messages are used to convey the receiver's rejection of the sender's request to connection.
+
+After receiving this message, the request sender dismisses all allocated DIDs and Keys
+
+#### Type
+
+We propose tat the message type for the connection rejection message will be `reject`, resulting in the following
+message type string:
+
+```
+did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connection/1.0/reject
+```
+
+#### Example and Attributes
+
+The connection rejection message contains only the threading object and the message type. No further information is
+needed.
+
+An example connection rejection message would then look like the following:
+
+```json
+{
+    "@type": "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connection/1.0/reject",
+    "@thread": { ... }
+}
+```
+
+#### Unresolved Questions
+
+- Do we want to optionally supply some type of "reason" attribute?
+
+------------------------------------------------------------------------------------------------------------------------
+
+## Example interactions
+
+Using the message family defined above, we will now consider an example of Alice and Bob establishing a connection and
+examine the flow of messages between the two parties.
+
+1. Alice and Bob meet at a conference and decide that they want to connect.
+2. Alice creates a connection request and invitation (the exact form of the invitation will be established in another HIPE).
+  - Alice sends the invitation to Bob (in a manner to be specified by another HIPE).
+  - Bob receives the invitation and uses it to obtain an agent, if he doesn't already own one, and receive the
+    connection request that Alice created.
+
+Bob now has several choices:
+
+#### 3a. Bob rejects the connection.
+
+Bob sends a rejection message to Alice using the information Alice provided for the relationship, terminating the
+relationship. When Alice's agent receives the rejection, the DID and key generated for the relationship are dismissed.
+
+#### 3b. Bob decides to negotiate the terms of the connection.
+
+Bob sends a connection offer message to Alice with altered terms. Alice indicates acceptance by sending a matching
+connection request
+
+> **TODO:** fill out the remainder of the HIPE
+
+#### 3c. Bob accepts the request.
 
 # Reference
 [reference]: #reference
