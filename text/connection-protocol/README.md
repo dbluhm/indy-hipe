@@ -87,8 +87,8 @@ terms to the connection. Upon receiving the counteroffer, the original request s
 terms of the offer, advancing the interaction, or issue another counter proposal, continuing the negotiation until
 favorable terms have been met.
 
-The party that receives the connection request can accept the terms and advance the interaction by simply sending one of
-the connection outcome messages described below.
+The party that receives the connection request can accept/reject the terms and advance the interaction by simply sending
+one of the "connection outcome" messages, connection acceptance or connection rejection, described below.
 
 Further detail on connection negotiation and how the terms of a connection are expressed can be provided by a future
 HIPE and won't be explored further here.
