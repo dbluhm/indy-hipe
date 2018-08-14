@@ -21,9 +21,9 @@ This HIPE will establish the exchange of messages needed to establish a pairwise
 
 ## Assumptions
 
-The step that has been referred to as a "connection trigger," "connection offer," (this term has been deemed
-inaccurate), and "connection invitation" will not be covered in this HIPE. We assume that some previous action has taken
-place to enable two agents to communicate.
+The step that has been referred to as a "connection trigger," "connection offer" (this term is actually used again in a
+different context), and "connection invitation" will not be covered in this HIPE. We assume that some previous action
+has taken place to enable at least the initiator to send a connection request.
 
 The details of transporting a message from one agent to the other will also not be covered in this HIPE. We assume the
 message packaging and transport details are correctly executed when using phrases like "Agent 1 sends the message
@@ -59,7 +59,7 @@ did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connection/1.0/request
 
 #### Example and Attributes
 
-An connection request minimally includes the following information:
+A connection request minimally includes the following information:
 
 ```json
 {
@@ -80,33 +80,30 @@ An connection request minimally includes the following information:
 
 #### Usage in negotiation
 
-The connection request message is the first message sent using agent-to-agent (A2A) encryption and routing. The
-connection request also marks the beginning of a "negotiation" or an exchange of request and counter-offer messages. If
-the terms of a connection request are not desirable, the receiving party can send an offer message proposing altered
-terms to the connection. Upon receiving the counteroffer, the original request sender can send a request matching the
-terms of the offer, advancing the interaction, or issue another counter proposal, continuing the negotiation until
-favorable terms have been met.
+The connection request message is the first message received by an agent. How it is received may differ based on the
+invitation scheme. The connection request also marks the beginning of a "negotiation" or an exchange of request and
+counter-offer messages establishing the type of keys to be used in the relationship. If the proposed keys for a pairwise
+relationship (contained in the connection request) are unsupported, the receiving party can send an offer message
+proposing a new key type for the connection. Upon receiving the counteroffer, the original request sender can send a
+request matching the terms of the offer, advancing the interaction, or issue another counter proposal, continuing the
+negotiation until a supported key type has been suggested.
 
-The party that receives the connection request can accept/reject the terms and advance the interaction by simply sending
-one of the "connection outcome" messages, connection acceptance or connection rejection, described below.
+The party that receives the connection request can also advance the interaction by simply sending one of the "connection
+outcome" messages, connection acceptance or connection rejection, described below.
 
-Further detail on connection negotiation and how the terms of a connection are expressed can be provided by a future
+Further detail on key negotiation and how the terms of a connection are expressed can be provided by a future
 HIPE and won't be explored further here.
-
-#### Unresolved Questions
-
-- Do we want more granular types for a connection request that supplies a `did` and for a request that supplies a
-  `diddoc`?
 
 ------------------------------------------------------------------------------------------------------------------------
 
 ### Connection Offer
 
-As mentioned above, the connection offer message is used to negotiate the terms of the connection. For more information
-see [Usage in Negotiation](#usage-in-negotiation) and this [spreadsheet](https://docs.google.com/spreadsheets/d/1RLJhhlWCUBYpKn18S5BGi7HH9MfGiZdHBxKjsJavoMs/edit#gid=0)
-and [video](http://bit.ly/2nhQMRC) by Daniel Hardman on connection establishment.
+As mentioned above, the connection offer message is used to negotiate the type of keys used in a connection.
+
+Further detail on key negotiation will be supplied in a future HIPE or future iteration of the connection protocol.
 
 #### Type
+
 We propose that the message type for a connection offer will be `offer`, resulting in the following message type string:
 
 ```
@@ -114,11 +111,6 @@ did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connection/1.0/offer
 ```
 
 #### Example and Attributes
-Connection offers must minimally contain enough information for the request sender to send successive connection
-requests if this information has not already been shared.
-
-> **TODO:** What is actually transmitted in the offer?
-> **TODO:** give an example
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -228,6 +220,9 @@ Strive to guarantee that:
 - Interactions with other features are clear.
 - Implementation trajectory is well defined.
 - Corner cases are dissected by example.
+
+- [Connection State Machine by Daniel Hardman](https://docs.google.com/spreadsheets/d/1RLJhhlWCUBYpKn18S5BGi7HH9MfGiZdHBxKjsJavoMs/edit#gid=0)
+- [Video describing Connection State Machine by Daniel Hardman](http://bit.ly/2nhQMRC)
 
 # Drawbacks
 [drawbacks]: #drawbacks
