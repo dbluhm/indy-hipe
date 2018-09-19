@@ -1,0 +1,71 @@
+@startuml
+skinparam monochrome true
+
+participant Alice as A
+participant Bob as B
+
+== Invitation ==
+
+activate A
+A -> A: Create ephemeral key pair:\nC.sk, C.vk
+A -> A: Prepare Invite
+rnote over A
+    Invite Message:
+    {
+        Alice's endpoint info,
+        C.vk
+    }
+end note
+A -> B: Send invitation
+note over A
+    Invitation message can be sent
+    out-of-band or through agent messaging.
+end note
+deactivate A
+
+== Request ==
+
+activate B
+B -> B: Create and store DID and keys
+B -> B: Create ephemeral key pair:\nD.sk, D.vk
+B -> B: Derive shared secret key K:\nK = DH(D.sk, C.vk)
+B -> B: Prepare Request
+rnote over B
+    request = {
+        Bob's endpoint info,
+        Bob's pairwise DID and keys or DID Doc
+    }
+    message = D.vk || encrypt(K, request)
+end note
+B -> A: Send Request
+B -> B: Destroy ephemeral keys C and D
+deactivate B
+
+== Response: Accept ==
+activate A
+A -> A: Create and store DID and keys
+A -> A: Extract D.vk from message
+A -> A: Derive shared secret key K:\nK = DH(C.sk, D.vk)
+A -> A: Destroy ephemeral keys C and D
+A -> A: request_message = decrypt(K, request)
+note over A
+    Auth-encryption with relationship
+    keys now possible
+end note
+A -> A: Prepare accept message
+rnote over A
+    accept = {
+        Alice's pairwise DID and keys or DID Doc
+    }
+end note
+A -> A: message = auth_crypt(Bob.vk, Alice.vk, accept)
+A -> B: Send Accept
+
+== Response: Reject ==
+
+A -> A: Extract D.vk from message
+A -> A: Derive shared secret key K:\nK = DH(C.sk, D.vk)
+A -> A:
+
+deactivate A
+@enduml

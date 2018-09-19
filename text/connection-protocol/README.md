@@ -1,35 +1,43 @@
 - Name: connection-protocol
 - Author: Daniel Bluhm <daniel.bluhm@sovrin.org>
-- Start Date: 2018-08-03
+- Start Date: 2018-18-09
 - PR:
 - Jira Issue:
 
 # Summary
 [summary]: #summary
 
-A definition of a connection establishment protocol.
+A definition of a connection establishment protocol. This HIPE differs greatly from the previously proposed connection
+protocol HIPE in a number of ways. Those differences include providing forward secrecy, shifting much of the
+implementation details to indy-sdk, and being significantly simpler.
 
 # Motivation
 [motivation]: #motivation
 
-Create a protocol that agent developers can use to establish connections between different agent implementations.
+Create a protocol that agent developers can use to establish connections between different agent implementations while
+providing requisite privacy and security.
 
 # Tutorial
 [tutorial]: #tutorial
 
-This HIPE will establish the exchange of messages needed to establish a pairwise connection between two agents.
+This HIPE will establish the exchange of messages or information needed to establish a pairwise connection between two
+agents.
 
 ## Assumptions
-
-The step that has been referred to as a "connection trigger," "connection offer" (this term is actually used again in a
-different context), and "connection invitation" will not be covered in this HIPE. We assume that some previous action
-has taken place to enable at least the initiator to send a connection request.
 
 The details of transporting a message from one agent to the other will also not be covered in this HIPE. We assume the
 message packaging and transport details are correctly executed when using phrases like "Agent 1 sends the message
 to Agent 2."
 
-## Message Family
+## Overview
+
+The connection protocol can be simply illustrated in the following sequence diagram:
+
+![Connection Protocol sequence diagram](overview.png)
+
+## Definitions
+
+### Message Family
 
 We propose that the message family used for the messages in this protocol will be `connection`, with a version of `1.0`,
 resulting in the message type string:
@@ -41,14 +49,37 @@ did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connection/1.0/<message_type>
 in accordance with the [proposed HIPE on message types](https://github.com/hyperledger/indy-hipe/pull/19).
 
 
-## Message Types
+### Message Types
 
-### Connection Request
+#### Connection Invitation
+
+A connection invitation is used to transmit the essential data necessary to initiate a connection request message. These
+invitations are **out-of-band communication** and are not a true agent message or agent message type. The means used to
+transmit connection invitations may be implemented in any number of proprietary ways. However, all connection
+invitations must transmit at least the following information:
+
+- Endpoint DID
+- Connection key (one time use)
+
+or
+
+- Endpoint URI
+- Endpoint key
+- Connection key (one time use)
+
+If an endpoint DID is used, it is assumed that the endpoint URI and endpoint key can be looked up in the DID Document
+that the DID references. Otherwise, the endpoint URI and endpoint key are explicitly provided.
+
+#### Connection Key
+
+A connection key is a single-use key that helps to verify the authenticity of connection requests received
+
+#### Connection Request
 
 A connection request is used to minimally transmit the information needed by the receiver to communicate with the sender
 in a pairwise relationship.
 
-#### Type
+##### Type
 
 We propose that the message type for a connection request will be `request`, resulting in the following message type
 string:
@@ -57,7 +88,7 @@ string:
 did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connection/1.0/request
 ```
 
-#### Example and Attributes
+##### Example and Attributes
 
 A connection request minimally includes the following information:
 
@@ -71,38 +102,28 @@ A connection request minimally includes the following information:
 }
 ```
 
-##### Attributes
+###### Attributes
 
 - `@thread` - the threading "decorator" described in [this HIPE](https://github.com/hyperledger/indy-hipe/pull/30).
   This decorator is used to identify which connection the message is referring to.
 - `did` or `diddoc` - the `did` attribute can be used to look up all information needed in the pairwise relationship
   (endpoints and keys) or a `diddoc` can be provided, resulting in the same set of information.
 
-#### Usage in negotiation
+##### Usage in negotiation
 
-The connection request message is the first message received by an agent. How it is received may differ based on the
-invitation scheme. The connection request also marks the beginning of a "negotiation" or an exchange of request and
-counter-offer messages establishing the type of keys to be used in the relationship. If the proposed keys for a pairwise
-relationship (contained in the connection request) are unsupported, the receiving party can send an offer message
-proposing a new key type for the connection. Upon receiving the counteroffer, the original request sender can send a
-request matching the terms of the offer, advancing the interaction, or issue another counter proposal, continuing the
-negotiation until a supported key type has been suggested.
-
-The party that receives the connection request can also advance the interaction by simply sending one of the "connection
-outcome" messages, connection acceptance or connection rejection, described below.
-
-Further detail on key negotiation and how the terms of a connection are expressed can be provided by a future
-HIPE and won't be explored further here.
+In the future, we anticipate that connection request messages will play a role in "crypto negotiation," or the process
+of negotiating cryptography standards to be used for keys and encryption methods. Details of this process will be given
+at a later date.
 
 ------------------------------------------------------------------------------------------------------------------------
 
-### Connection Offer
+#### Connection Offer
 
-As mentioned above, the connection offer message is used to negotiate the type of keys used in a connection.
+The connection offer message is anticipated to be used in "crypto negotiation."
 
-Further detail on key negotiation will be supplied in a future HIPE or future iteration of the connection protocol.
+Further detail on crypto negotiation and connection offers will be supplied in the future.
 
-#### Type
+##### Type
 
 We propose that the message type for a connection offer will be `offer`, resulting in the following message type string:
 
@@ -110,16 +131,14 @@ We propose that the message type for a connection offer will be `offer`, resulti
 did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connection/1.0/offer
 ```
 
-#### Example and Attributes
-
 ------------------------------------------------------------------------------------------------------------------------
 
-### Connection Accept
+#### Connection Accept
 
 Connection acceptance messages are used to transmit both acceptance of the sender's request and the information needed
 by the request sender to communicate with the receiver in a pairwise relationship.
 
-#### Type
+##### Type
 
 We propose that the message type for the connection acceptance message will be `accept`, resulting in the following
 message type string:
@@ -128,7 +147,7 @@ message type string:
 did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connection/1.0/accept
 ```
 
-#### Example and Attributes
+##### Example and Attributes
 
 ```json
 {
@@ -140,29 +159,29 @@ did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connection/1.0/accept
 }
 ```
 
-#### Attributes
+##### Attributes
 - `@thread` - The threading object used to correlate different messages with each other.
 - `did` or `diddoc` - the `did` attribute can be used to look up all information needed in the pairwise relationship
   (endpoints and keys) or a `diddoc` can be provided, resulting in the same set of information.
 
 ------------------------------------------------------------------------------------------------------------------------
 
-### Connection Reject
+#### Connection Reject
 
 Connection rejection messages are used to convey the receiver's rejection of the sender's request to connection.
 
 After receiving this message, the request sender dismisses all allocated DIDs and Keys
 
-#### Type
+##### Type
 
-We propose tat the message type for the connection rejection message will be `reject`, resulting in the following
+We propose that the message type for the connection rejection message will be `reject`, resulting in the following
 message type string:
 
 ```
 did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connection/1.0/reject
 ```
 
-#### Example and Attributes
+##### Example and Attributes
 
 The connection rejection message contains only the threading object and the message type. No further information is
 needed.
@@ -176,7 +195,7 @@ An example connection rejection message would then look like the following:
 }
 ```
 
-#### Unresolved Questions
+##### Unresolved Questions
 
 - Do we want to optionally supply some type of "reason" attribute?
 
