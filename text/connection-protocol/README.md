@@ -55,7 +55,7 @@ _connection_request_.
 
 #### requested
 A _connection_request_ has been sent by the _invitee_ to the _inviter_ based on the information in
-the _invitation_. 
+the _invitation_.
 
 #### responded
 A _connection_response_ has been sent by the _inviter_ to the _invitee_ based on the information in
@@ -67,7 +67,7 @@ The invitation is valid.
 > TODO: Timeout or Error States
 
 ### Flow Overview
-The _inviter_ gives provisional connection information to the _invitee_. 
+The _inviter_ gives provisional connection information to the _invitee_.
 
 The _invitee_ uses provisional information to send a DID and DID Document to the _inviter_.
 
@@ -141,7 +141,7 @@ capable of processing the invitation. Already onboarded users will be able to pr
 without loading in a browser via mobile app URL capture, or via capability detection after being
 loaded in a browser.
 
-The standard invitation format is a URL with a Base64URLEncoded json object as a query parameter. 
+The standard invitation format is a URL with a Base64URLEncoded json object as a query parameter.
 
 The Invitation URL format is as follows, with some elements described below:
 
@@ -152,7 +152,7 @@ https://<domain>/<path>?c_i=<invitationstring>
 `<domain>` and `<path>` should be kept as short as possible, and the full URL should return human
 readable instructions when loaded in a browser. This is intended to aid new users. Additional path
 elements or query parameters are allowed, and can be leveraged to provide coupons or other promise
-of payment for new users. 
+of payment for new users.
 
 The `<invitationstring>` is an agent plaintext message (not a wire level message) that has been
 Base64URLEncoded. For brevity, the json encoding should minimize unnecessary white space.
@@ -175,7 +175,7 @@ http://example.com/ssi?c_i=eydAdHlwZSc6J2RpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZ
 ```
 
 Invitation URLs can be transferred via any method that can send text, including an email, SMS,
-posting on a website, or via a QR Code. 
+posting on a website, or via a QR Code.
 
 Example URL encoded as a QR Code:
 
@@ -295,7 +295,7 @@ endpoint are to be used going forward in the connection.
 
 #### Response Transmission
 The message should be packaged in the wire level format, using the keys from the request, and the
-new keys presented in the internal did doc. 
+new keys presented in the internal did doc.
 
 When the message is transmitted, we are now in the `responded` state.
 
