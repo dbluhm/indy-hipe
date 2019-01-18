@@ -69,9 +69,9 @@ The invitation is valid.
 ### Flow Overview
 The _inviter_ gives provisional connection information to the _invitee_. 
 
-The _invitee_ uses provisional information to send a DID and DIDDocument to the _inviter_.
+The _invitee_ uses provisional information to send a DID and DID Document to the _inviter_.
 
-The _inviter_ uses sent DIDDocument information to send a DID and DIDDocument to the _invitee_.
+The _inviter_ uses sent DID Document information to send a DID and DID Document to the _invitee_.
 
 ## 0. Invitation to Connect
 [0-invitation]: #1-invitation
@@ -155,13 +155,13 @@ elements or query parameters are allowed, and can be leveraged to provide coupon
 of payment for new users. 
 
 The `<invitationstring>` is an agent plaintext message (not a wire level message) that has been
-base64 url encoded. For brevity, the json encoding should minimize unnecessary white space.
+Base64URLEncoded. For brevity, the json encoding should minimize unnecessary white space.
 
 ```javascript
 invitation_string = b64urlencode(<invitation_message>)
 ```
 
-During encoding, whitespace from the json string should be eliminated to keep the resulting
+During encoding, white space from the json string should be eliminated to keep the resulting
 invitation string as short as possible.
 
 ```text
@@ -174,7 +174,7 @@ Example URL:
 http://example.com/ssi?c_i=eydAdHlwZSc6J2RpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uJywnZGlkJzonZGlkOnNvdjpRbVdic05ZaE1yakhpcVpEVFVURUpzJywnbGFiZWwnOidBbGljZSd9
 ```
 
-Invitation URLs can be transfered via any method that can send text, including an email, SMS,
+Invitation URLs can be transferred via any method that can send text, including an email, SMS,
 posting on a website, or via a QR Code. 
 
 Example URL encoded as a QR Code:
@@ -190,13 +190,13 @@ _invitee_. After publishing, we have entered the _invited_ state.
 
 #### Invitation Processing
 
-When they _invitee_ receives the invitation URL, there are two possible user flows that depend on
+When the _invitee_ receives the invitation URL, there are two possible user flows that depend on
 the SSI preparedness of the individual. If the individual is new to the SSI universe, they will
 likely load the URL in a browser. The resulting page will contain instructions on how to get started
 by installing software or a mobile app. That install flow will transfer the invitation message to
 the newly installed software.
 A user that already has those steps accomplished will have the URL received by software directly.
-That sofware can read the invitation message directly out of the `c_i` query parameter, without
+That software can read the invitation message directly out of the `c_i` query parameter, without
 loading the URL.
 
 If they _invitee_ wants to accept the connection invitation, they will use the information present
@@ -246,7 +246,7 @@ After receiving the connection request, the _inviter_ evaluates the provided DID
 according to the DID Method Spec.
 
 The _inviter_ should check the information presented with the keys used in the wire-level message
-transmission to esure they match.
+transmission to ensure they match.
 
 > TODO: Specify error transmission back to _invitee_ in the event an error is found.
 >
@@ -301,7 +301,7 @@ When the message is transmitted, we are now in the `responded` state.
 
 #### Response Processing
 When the _invitee_ receives the `response` message, they will verify the `change_sig` provided.
-After validation, theywill update their wallet with the new connection information. If the endpoint
+After validation, they will update their wallet with the new connection information. If the endpoint
 was changed, they may wish to execute a Trust Ping to verify that new endpoint.
 
 > TODO: Design the error report message if the change_sig fails.
